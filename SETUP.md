@@ -80,19 +80,66 @@ ssh $DROPLET "mkdir -p $WEBROOT \
 
 ## 4. Authorize the key, restricted to that one command
 
-```sh
-ssh $DROPLET "printf '%s %s\n' \
-  'command=\"/usr/local/bin/landing-deploy\",no-agent-forwarding,no-port-forwarding,no-pty,no-X11-forwarding,restrict' \
-  '$(cat ~/.ssh/id_ed25519_landing.pub)' >> ~deploy/.ssh/authorized_keys"
-```
-
-Prove it is actually restricted — a green deploy proves the key works, never that it is
-confined:
+⚠️ **Set the two variables on their own lines first.** An earlier revision of this file wrapped
+one `ssh` command across three lines with backslash continuations inside a double-quoted string;
+a single stray space after a backslash silently changes what gets appended, and this line is the
+security boundary. Assign, then use — the `ssh` call stays on one line.
 
 ```sh
-ssh -i ~/.ssh/id_ed25519_landing deploy@147.182.219.112 'cat /etc/shadow'
-# expected: landing-deploy: expected index.html   (the command is ignored — good)
+PUBKEY="$(cat ~/.ssh/id_ed25519_landing.pub)"
+OPTS='command="/usr/local/bin/landing-deploy",no-agent-forwarding,no-port-forwarding,no-pty,no-X11-forwarding,restrict'
+
+ssh $DROPLET "printf '%s %s\n' '$OPTS' '$PUBKEY' >> ~deploy/.ssh/authorized_keys"
 ```
+
+**Verify the line parsed**, rather than assuming it did. A malformed options field is the one
+mistake here that could leave the key unrestricted:
+
+```sh
+ssh $DROPLET 'ssh-keygen -l -f ~deploy/.ssh/authorized_keys'
+# the landing key's fingerprint must appear — compare with:
+ssh-keygen -lf ~/.ssh/id_ed25519_landing.pub
+
+ssh $DROPLET 'tail -2 ~deploy/.ssh/authorized_keys | cat -A | cut -c1-120'
+# cat -A makes trailing whitespace and stray backslashes visible
+```
+
+**Then prove the key is confined.** A green deploy proves the key works, never that it cannot do
+anything else:
+
+```sh
+ssh -i ~/.ssh/id_ed25519_landing deploy@147.182.219.112 'cat /etc/shadow' < /dev/null
+```
+
+Expected:
+
+```
+gzip: stdin: unexpected end of file
+tar: Child returned status 1
+tar: Error is not recoverable: exiting now
+```
+
+The client's command is discarded and `landing-deploy` runs instead, which reads a tarball from
+stdin and finds an empty stream. **What matters is that `/etc/shadow` is not printed.**
+
+⚠️ **`< /dev/null` is not optional.** Without it, stdin is your terminal, `tar` waits for a
+tarball that never arrives, and the session appears to hang. That is the forced command working
+correctly — press Ctrl-C. (An earlier revision of this file omitted the redirect and predicted
+`landing-deploy: expected index.html`, which is what you get from a *valid* tarball that has no
+`index.html` in it, not from an empty stream.)
+
+**If the line is malformed**, delete it and redo the append above. Only lines mentioning
+`landing-deploy` match, so the backup key (`backup-export` / `jupiter-backup`) is untouched:
+
+```sh
+ssh $DROPLET "sed -i.bak '/landing-deploy/d' ~deploy/.ssh/authorized_keys \
+  && chown deploy:deploy ~deploy/.ssh/authorized_keys \
+  && chmod 600 ~deploy/.ssh/authorized_keys \
+  && cat ~deploy/.ssh/authorized_keys"
+```
+
+⚠️ The `chown`/`chmod` are not decoration — `sed -i` run as root leaves the file root-owned, and
+sshd's `StrictModes` is particular about this file.
 
 ## 5. Split the nginx config
 
