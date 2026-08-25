@@ -1,0 +1,88 @@
+name: Deploy
+
+# Push to main IS the deploy. The page has no versions and no release notes, so
+# there is nothing for a GitHub Release to carry — the reason budget-buddy gates
+# on one does not apply here.
+#
+# This exists because the manual copy it replaces failed twice on 2026-08-24
+# (CaddisMaster/budget-buddy#288, #291): the fix was merged, the page was not
+# updated, and nothing said so until a drift check noticed.
+on:
+  push:
+    branches: [main]
+    paths: ['index.html']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Two pushes deploying at once would race on the same file on the box. Never
+# cancel one in flight — a cancelled transfer can leave a partial file served.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Copy to the Droplet and verify it is live
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Deploy over SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DROPLET_KNOWN_HOSTS }}
+          HOST: ${{ secrets.DROPLET_HOST }}
+          USER_NAME: ${{ vars.DROPLET_USER }}
+        run: |
+          # Fail closed, and name which one is missing. A half-configured deploy
+          # that "succeeds" while copying nothing is the failure mode this whole
+          # workflow exists to remove, so an unset secret must be loud.
+          for v in SSH_KEY KNOWN_HOSTS HOST USER_NAME; do
+            if [ -z "${!v}" ]; then
+              echo "::error::$v is not configured. See README.md -> Deploy setup."
+              exit 1
+            fi
+          done
+
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          # Pinned host key. StrictHostKeyChecking=no would accept anything
+          # answering on that address, which is the whole attack this prevents.
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+          # The key is restricted to ONE forced command on the box, which reads a
+          # tarball on stdin and extracts it into the web root. Nothing here
+          # names a destination path: the server decides where bytes land, so a
+          # leaked key cannot write anywhere else. See README.md.
+          tar -czf - index.html \
+            | ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes \
+                  "${USER_NAME}@${HOST}"
+          echo "index.html sent ($(stat -c%s index.html) bytes)"
+
+      - name: Scrub the key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
+
+      - name: Verify the live page is the file we just pushed
+        run: |
+          # ⚠️ A PRESENCE check, deliberately. Asserting only that something is
+          # absent passes just as happily against an nginx error page, which is
+          # exactly the state a broken deploy produces.
+          for i in $(seq 1 10); do
+            live=$(curl -fsS --max-time 10 https://seandesmet.com/ || true)
+            if [ -n "$live" ] \
+               && [ "$(printf '%s' "$live" | md5sum | cut -d' ' -f1)" \
+                  = "$(md5sum index.html | cut -d' ' -f1)" ]; then
+              echo "Live page is byte-identical to index.html."
+              exit 0
+            fi
+            echo "attempt $i: not matching yet"
+            sleep 5
+          done
+          echo "::error::Deploy finished but https://seandesmet.com/ does not match index.html."
+          exit 1
