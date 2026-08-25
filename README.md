@@ -43,8 +43,11 @@ would carry nothing.
 
 ### Deploy setup
 
+**See [`SETUP.md`](SETUP.md)** for the one-time Droplet setup, run from a Mac terminal.
+
 The workflow fails closed and names the missing piece, so it is safe to merge before any of
-this exists. Four things are needed on the `production` environment:
+that exists — an unconfigured deploy reports `SSH_KEY is not configured`, not a green run that
+copied nothing. Four things are needed on the `production` environment:
 
 | Kind | Name | Value |
 |---|---|---|
@@ -53,29 +56,10 @@ this exists. Four things are needed on the `production` environment:
 | Secret | `DROPLET_KNOWN_HOSTS` | `ssh-keyscan` output, so the host key is pinned |
 | Variable | `DROPLET_USER` | the deploying user |
 
-⚠️ **The key must be restricted with a forced command.** The workflow deliberately sends a
-tarball on stdin and names no destination path, so the *server* decides where bytes land and a
-leaked key cannot write anywhere else. Same shape as the backup pull's restricted key.
-
-On the Droplet, the receiving script:
-
-```sh
-# /usr/local/bin/landing-deploy   (chmod 755, owned by root)
-#!/bin/sh
-set -e
-exec tar -xzf - -C /var/www/seandesmet.com
-```
-
-and the key's entry in that user's `~/.ssh/authorized_keys`:
-
-```
-command="/usr/local/bin/landing-deploy",no-agent-forwarding,no-port-forwarding,no-pty,no-X11-forwarding ssh-ed25519 AAAA... landing-deploy
-```
-
-⚠️ **Add the nginx site file for this page to BOTH backup config path lists** — the Droplet's
-`/usr/local/bin/budget-buddy-backup` and the VM's `droplet-backup.sh`. They are separate copies
-with nothing syncing them, and they have drifted before. Miss this and the configs tarball
-silently stops covering this page's config.
+⚠️ **The key is restricted with a forced command.** The workflow sends a tarball on stdin and
+names no destination path, so the *server* decides where bytes land — and only `index.html` is
+ever written, whatever the tarball contains. That is what makes the key safe to hold in
+GitHub. Same shape as the backup pull's restricted key; the script is in `SETUP.md` §2.
 
 ## Certificates
 
