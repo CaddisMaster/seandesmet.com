@@ -7,12 +7,24 @@ file is meant to be run from the VM.
 Work top to bottom. **Nothing is removed until the replacement is verified serving**, so the
 old page keeps serving right up to §7, and §8 is the only irreversible step.
 
-Variables used below:
+---
+
+## 0. Set the variables and confirm you can reach the box
+
+⚠️ **Run this — it is a step, not a legend.** Every later command uses `$DROPLET`. Unset, `ssh`
+takes the *script* as the hostname and fails with `hostname contains invalid characters`,
+having connected to nothing. (Harmless, but confusing: it looks like the script is malformed
+when the variable is simply empty.)
 
 ```sh
 DROPLET=root@147.182.219.112
 WEBROOT=/var/www/seandesmet.com
+
+ssh $DROPLET "echo connected as \$(whoami)"    # expect: connected as root
 ```
+
+⚠️ These are shell variables, not exports — **a new terminal loses them.** If you come back to
+this later, or open a second tab, run this section again first.
 
 ---
 
