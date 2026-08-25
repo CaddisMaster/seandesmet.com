@@ -73,16 +73,21 @@ jobs:
           # ⚠️ A PRESENCE check, deliberately. Asserting only that something is
           # absent passes just as happily against an nginx error page, which is
           # exactly the state a broken deploy produces.
+          #
+          # Compare through a FILE, never through $(...): command substitution
+          # strips trailing newlines, so a page that is genuinely byte-identical
+          # hashes one byte short of index.html and this check can never pass.
           for i in $(seq 1 10); do
-            live=$(curl -fsS --max-time 10 https://seandesmet.com/ || true)
-            if [ -n "$live" ] \
-               && [ "$(printf '%s' "$live" | md5sum | cut -d' ' -f1)" \
-                  = "$(md5sum index.html | cut -d' ' -f1)" ]; then
+            if curl -fsS --max-time 10 https://seandesmet.com/ -o live.html \
+               && [ -s live.html ] \
+               && cmp -s live.html index.html; then
               echo "Live page is byte-identical to index.html."
+              rm -f live.html
               exit 0
             fi
             echo "attempt $i: not matching yet"
             sleep 5
           done
+          rm -f live.html
           echo "::error::Deploy finished but https://seandesmet.com/ does not match index.html."
           exit 1
