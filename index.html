@@ -109,6 +109,26 @@
       color: var(--accent);
     }
 
+    .section {
+      margin-bottom: 2.5rem;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6b6b6b;
+      margin-bottom: 0.75rem;
+    }
+
+    .about {
+      font-size: 1rem;
+      line-height: 1.7;
+      color: #333;
+      max-width: 62ch;
+    }
+
     .card-title {
       font-size: 1rem;
       font-weight: 500;
@@ -238,6 +258,8 @@
       .link { background: #242424; border-color: #333; color: #f0f0f0; }
       .project { background: #242424; border-color: #333; }
       .card-desc, .about-intro, .subtitle { color: #aaa; }
+      .about { color: #ccc; }
+      .section-label { color: #999; }
       .tag, .stack-tag { background: #333; color: #ccc; border-color: #444; }
       .btn-details { border-color: #444; color: #aaa; }
       .btn-details:hover { background: #2a2a2a; }
@@ -270,10 +292,17 @@
     </header>
 
     <main>
+    <section class="section" aria-labelledby="about-heading">
+      <h2 class="section-label" id="about-heading">About</h2>
+      <p class="about">I build web applications end to end, from the database schema to the server they run on. I learn by building real things rather than following courses, and I run what I build in production: my own domain, HTTPS, and automated deployments.</p>
+    </section>
+
+    <section class="section" aria-labelledby="projects-heading">
+    <h2 class="section-label" id="projects-heading">Projects</h2>
     <div class="project">
       <div class="card-top">
         <a href="https://budget.seandesmet.com" class="card-link">
-          <h2 class="card-title">Budget Buddy</h2>
+          <h3 class="card-title">Budget Buddy</h3>
           <p class="card-desc">Personal budget tracking and ledger system with analytics, recurring transactions, and dashboard.</p>
           <div class="tags">
             <span class="tag">Flask</span>
@@ -322,6 +351,7 @@
         </div>
       </div>
     </div>
+    </section>
     </main>
 
   </div>
