@@ -75,8 +75,9 @@ scripts/check-stack.sh        # THE gate — one file, run by both workflows
   A redesign that renames that class or restructures the tags fails the deploy with a message
   about the selector. Change the check **in the same PR** as the markup, and keep its
   "matched nothing" assertion — an absence check that cannot fail is worse than none
-- The stack tags are **factual claims about Budget Buddy**. Check them against budget-buddy's
-  `CLAUDE.md` before writing one — the page advertised Chart.js for four releases after the app
+- The stack tags are **factual claims about each project**. Check them against that project's own
+  docs (budget-buddy's `CLAUDE.md`; material-list-import-tool's `README.md` §Tech stack) before
+  writing one — the page advertised Chart.js for four releases after the app
   dropped it (budget-buddy#291)
 
 **The page**
@@ -95,6 +96,12 @@ scripts/check-stack.sh        # THE gate — one file, run by both workflows
   ⚠️ **Loading Home can make a billed model call**: when the month has no cached AI read, the page's
   own script requests one right after load. Nothing in the markup looks like it — it cost one call
   the first time. Retake against a user whose month already has a read, or with the AI key unset
+- ⚠️ **The Material List Import Tool card is an OUTLINE of a PRIVATE project** (#27), and that
+  project's `README.md` is the authority for what it may say. **Never name the employer** (Sean's
+  call — it is not deployed and waits on their IT and data-governance review), **never add a
+  screenshot** (a useful one is a real builder's takeoff), **never link the repo**, and no
+  builder, store, job or item names. The first-run figures are the README's published aggregate
+  only. Any new claim is checked against that README first, not written from memory
 - ⚠️ **This repo is public.** No email address, phone number or home address in markup —
   LinkedIn is the contact route (#7). Nothing from `CLAUDE.local.md` belongs in any tracked file
 
