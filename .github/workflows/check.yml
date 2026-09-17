@@ -1,10 +1,10 @@
 name: Check
 
-# The stack-tag gate, run on every pull request so a PR meets it BEFORE merge.
-# Until #23 it ran only in deploy.yml, on a push to main: a bad change was
+# The page's gates, run on every pull request so a PR meets them BEFORE merge.
+# Until #23 they ran only in deploy.yml, on a push to main: a bad change was
 # caught after merging, with main already red.
 #
-# No path filter, deliberately. Branch protection requires this check by name,
+# No path filter, deliberately. Branch protection requires these checks by name,
 # and a required check that never runs leaves the PR waiting forever — so a
 # docs-only PR must run it too. It takes seconds.
 on:
@@ -24,3 +24,13 @@ jobs:
 
       - name: No stack tag names a retired library
         run: scripts/check-stack.sh
+
+  csp:
+    # ⚠️ Also required by name on main (#29) — same rule as the job above.
+    name: The page fits the server's CSP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Nothing in index.html falls outside the CSP
+        run: scripts/check-csp.sh

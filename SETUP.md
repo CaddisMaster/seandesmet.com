@@ -247,6 +247,134 @@ The old `/root/budget-buddy.nginx.bak` from §5 can go once you are happy.
 Budget Buddy's own cleanup (deleting `landing/`, dropping its drift check) is
 budget-buddy#299 step 6 — a separate PR in that repo, after this is all done.
 
+## 9. Security headers (#29)
+
+Added after the split — run it once, any time after §8. Like everything in this file it runs
+**from the Mac**, and nothing here touches `budget.seandesmet.com`: only the `seandesmet.com` site
+file changes.
+
+It adds seven response headers, hides the nginx version, and declares `charset=utf-8`. The
+reasoning behind each value is in #29; the one that matters most is the
+**Content-Security-Policy**, which only works because the page loads nothing but `data:` URIs:
+
+```
+default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:;
+base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+```
+
+⚠️ **That policy is a contract with `index.html`.** A script, a web-font link or an external image
+added to the page would be silently blocked in every visitor's browser. `scripts/check-csp.sh`
+enforces the page side on every PR and before every deploy; this section is the server side. If the
+page ever genuinely needs more, change the policy **here and on the box first**.
+
+⚠️ **HSTS is a one-year promise.** Once a browser has seen it, it refuses plain HTTP for
+`seandesmet.com` for a year and will not let a visitor click through a certificate error. That is
+the point — but it means an expired certificate becomes a hard outage rather than a warning.
+certbot's renewal is what keeps that promise. `includeSubDomains` is deliberately **not** set, so
+no other subdomain is bound by it.
+
+**Run §0 first** if this is a new terminal — every command uses `$DROPLET`.
+
+### 9a. Look before changing anything
+
+```sh
+ssh $DROPLET 'cat /etc/nginx/sites-available/seandesmet.com; echo ---; grep -n add_header /etc/nginx/sites-available/seandesmet.com || echo "no add_header lines"'
+```
+
+Expect the file from §5 and **`no add_header lines`**. ⚠️ If there are any, stop and ask: nginx does
+not merge `add_header` across levels, so an existing one inside a `location` block would silently
+drop every header this section adds, for that location.
+
+### 9b. Write the snippet
+
+Written whole, from a quoted heredoc, so nothing in it is expanded or re-quoted on the way:
+
+```sh
+ssh $DROPLET 'cat > /etc/nginx/snippets/seandesmet-security-headers.conf' <<'EOF'
+# Security headers for seandesmet.com. Managed from the seandesmet.com repo,
+# SETUP.md §9 (#29) — change it there first.
+# The CSP is a contract with index.html: no scripts, inline styles only, fonts
+# and images as data: URIs. scripts/check-csp.sh enforces the page side.
+server_tokens off;
+charset utf-8;
+add_header Strict-Transport-Security "max-age=31536000" always;
+add_header Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;
+add_header X-Frame-Options "DENY" always;
+add_header Cross-Origin-Opener-Policy "same-origin" always;
+EOF
+ssh $DROPLET 'cat /etc/nginx/snippets/seandesmet-security-headers.conf'
+```
+
+The second command prints it back. Check the CSP line survived intact, single quotes included.
+
+### 9c. Include it, test, and reload — or restore
+
+One script, sent as a quoted heredoc so none of it is interpreted by the Mac's shell. It refuses to
+guess: it adds the `include` only when the HTTPS block's `root` line appears **exactly once**, backs
+the file up first, and **restores the backup and does not reload** if `nginx -t` fails. Running it
+twice is harmless.
+
+```sh
+ssh $DROPLET 'bash -s' <<'EOF'
+set -eu
+SITE=/etc/nginx/sites-available/seandesmet.com
+INC='include /etc/nginx/snippets/seandesmet-security-headers.conf;'
+
+if grep -qF "$INC" "$SITE"; then
+  echo "already included — testing only"
+  nginx -t
+  exit 0
+fi
+
+n=$(grep -c '^[[:space:]]*root /var/www/seandesmet.com;' "$SITE" || true)
+if [ "$n" != 1 ]; then
+  echo "expected exactly one 'root /var/www/seandesmet.com;' line, found $n — stopping, nothing changed" >&2
+  exit 1
+fi
+
+cp "$SITE" /root/seandesmet.com.nginx.pre-headers.bak
+sed -i "s|^\([[:space:]]*\)root /var/www/seandesmet.com;|&\n\1$INC|" "$SITE"
+
+if nginx -t; then
+  systemctl reload nginx
+  echo "reloaded"
+else
+  cp /root/seandesmet.com.nginx.pre-headers.bak "$SITE"
+  echo "nginx -t FAILED — restored the previous file, nothing reloaded" >&2
+  exit 1
+fi
+
+grep -n -B1 -A1 'security-headers' "$SITE"
+EOF
+```
+
+Expect `syntax is ok`, `test is successful`, `reloaded`, and the `include` line printed directly
+under `root /var/www/seandesmet.com;`.
+
+### 9d. Verify
+
+```sh
+curl -sSI https://seandesmet.com/     | grep -iE 'server|content-type|strict-transport|content-security|x-content|referrer|permissions|x-frame|cross-origin'
+curl -sSI https://www.seandesmet.com/ | grep -ciE 'strict-transport|content-security|x-content|referrer|permissions|x-frame|cross-origin'   # expect: 7
+curl -sSI https://budget.seandesmet.com/ | head -1                                                                                       # expect: unchanged
+```
+
+Expect `Server: nginx` with **no version**, `Content-Type: text/html; charset=utf-8`, and all seven
+headers. Then tell Claude — a session can read the live headers and render the page under the
+real policy from the VM, since that needs no access to the box.
+
+### 9e. Roll back, if ever needed
+
+```sh
+ssh $DROPLET 'sed -i "\|seandesmet-security-headers.conf|d" /etc/nginx/sites-available/seandesmet.com && nginx -t && systemctl reload nginx'
+```
+
+That removes every header at once. Browsers that already saw HSTS keep enforcing HTTPS until their
+year runs out, which is harmless while the certificate stays valid.
+
 ---
 
 ## What you do NOT need to do

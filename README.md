@@ -61,6 +61,14 @@ names no destination path, so the *server* decides where bytes land — and only
 ever written, whatever the tarball contains. That is what makes the key safe to hold in
 GitHub. Same shape as the backup pull's restricted key; the script is in `SETUP.md` §2.
 
+## Security headers
+
+nginx sends HSTS, a strict Content-Security-Policy and five more headers from a snippet on the box —
+**[`SETUP.md`](SETUP.md) §9** has the values, the steps and the rollback (#29).
+
+⚠️ **The CSP only allows inline styles and `data:` fonts and images.** The page is built that way on
+purpose, and `scripts/check-csp.sh` fails any PR that adds something the policy would block.
+
 ## Certificates
 
 Apex and `www` already have their own certbot lineage, separate from `budget.seandesmet.com`.

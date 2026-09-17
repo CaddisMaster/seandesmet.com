@@ -19,6 +19,7 @@ Split out of `CaddisMaster/budget-buddy` under budget-buddy#299.
 > | edit `index.html` | §Non-negotiables below |
 > | rename a class, restructure the stack tags, or edit a workflow | [`scripts/check-stack.sh`](scripts/check-stack.sh), and the branch protection note in §Git & development workflow |
 > | add any file the page loads (CSS, JS, image, favicon, PDF) | §Non-negotiables → "Only `index.html` reaches the box" |
+> | add a `<script>`, a web-font or stylesheet link, an external image, or change a response header | [`scripts/check-csp.sh`](scripts/check-csp.sh) and [`SETUP.md`](SETUP.md) §9 — the CSP blocks it otherwise |
 > | write a claim about Budget Buddy's features or stack | budget-buddy's `CLAUDE.md` §Tech Stack |
 > | run anything on the Droplet | [`SETUP.md`](SETUP.md) — from a **Mac terminal**, never from the VM |
 > | touch certificates or the nginx site file | [`README.md`](README.md) §Certificates and `SETUP.md` §5 |
@@ -34,7 +35,10 @@ Split out of `CaddisMaster/budget-buddy` under budget-buddy#299.
 - **Serving:** Nginx on the Droplet, web root `/var/www/seandesmet.com`, Let's Encrypt certificate
   with its own lineage (separate from `budget.seandesmet.com`)
 - **Deploy:** GitHub Actions (`deploy.yml`) → SSH with a key restricted to one forced command
-- **Checks:** `scripts/check-stack.sh`, run on every PR (`check.yml`) and again before every deploy
+- **Checks:** `scripts/check-stack.sh` and `scripts/check-csp.sh`, run on every PR (`check.yml`)
+  and again before every deploy
+- **Response headers:** HSTS, a strict CSP and five more, from
+  `/etc/nginx/snippets/seandesmet-security-headers.conf` on the box — `SETUP.md` §9 (#29)
 
 ## Project map
 
@@ -45,7 +49,8 @@ SETUP.md                      # one-time Droplet setup runbook (run from a Mac)
 CLAUDE.md                     # this file
 .github/workflows/deploy.yml  # stack-tag gate → copy to Droplet → byte-for-byte live verify
 .github/workflows/check.yml   # the same gate on every pull request
-scripts/check-stack.sh        # THE gate — one file, run by both workflows
+scripts/check-stack.sh        # THE stack-tag gate — one file, run by both workflows
+scripts/check-csp.sh          # the page side of the server's CSP — same two workflows
 ```
 
 ## Non-negotiables
@@ -85,9 +90,11 @@ scripts/check-stack.sh        # THE gate — one file, run by both workflows
 - Accessible by default: semantic landmarks, one `<h1>`, visible `:focus-visible`, expandable
   controls carry `aria-expanded`, icon-only links carry an accessible name, WCAG AA contrast
 - External links to Sean's own properties only. `target="_blank"` needs `rel="noopener"`
-- **No third-party requests without an issue that says why** — web fonts, analytics, CDNs. The
-  page is currently zero-dependency, which is part of why it is fast and part of why it cannot
-  break
+- **No third-party requests — and the server now enforces it.** nginx sends
+  `default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:` (#29), so a web
+  font, analytics, a CDN or any `<script>` is **blocked in the visitor's browser with no error
+  anywhere a maintainer looks**. `scripts/check-csp.sh` fails the PR instead. If something is
+  genuinely needed: an issue, then the policy in `SETUP.md` §9 and on the box, **then** the page
 - ⚠️ **The Budget Buddy screenshot is SAMPLE DATA and must stay that way** (#25). It is a WebP
   `data:` URI of the local dev stack, logged in as a `portfolio-demo` user created by budget-buddy's
   `scripts/seed_dev.py` — never a real account, never production. To retake it: seed that user
@@ -134,9 +141,10 @@ It takes a path, so its failure paths can be exercised on a scratch copy without
 Same rule as budget-buddy. Rationale lives in budget-buddy's `CONTRIBUTING.md` §2.
 
 **Issue → branch → PR → squash-merge.** `main` is **protected** (#23): a direct push is rejected,
-admins included, and a PR cannot merge until **The tech stack names nothing retired** passes.
-⚠️ The protection rule requires that check **by its job name** — renaming the job in `check.yml`
-without updating the rule leaves every PR waiting on a check that never reports. There is no
+admins included, and a PR cannot merge until **The tech stack names nothing retired** and **The
+page fits the server's CSP** (#29) both pass.
+⚠️ The protection rule requires those checks **by their job names** — renaming a job in
+`check.yml` without updating the rule leaves every PR waiting on a check that never reports. There is no
 approval requirement: a sole maintainer cannot approve their own PR.
 
 1. **Every change starts from an issue** — no issueless PRs. Feature issues carry Gherkin

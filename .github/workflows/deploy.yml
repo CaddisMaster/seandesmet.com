@@ -17,6 +17,7 @@ on:
       - 'index.html'
       - '.github/workflows/deploy.yml'
       - 'scripts/check-stack.sh'
+      - 'scripts/check-csp.sh'
   workflow_dispatch:
 
 permissions:
@@ -40,11 +41,22 @@ jobs:
       - name: No stack tag names a retired library
         run: scripts/check-stack.sh
 
+  # A page the server's CSP would block must not ship: it would deploy green and
+  # then silently fail in every visitor's browser (#29).
+  csp:
+    name: The page fits the server's CSP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Nothing in index.html falls outside the CSP
+        run: scripts/check-csp.sh
+
   deploy:
     name: Copy to the Droplet and verify it is live
     runs-on: ubuntu-latest
-    # Nothing ships unless the check above passed.
-    needs: check
+    # Nothing ships unless both checks above passed.
+    needs: [check, csp]
     environment: production
     steps:
       - uses: actions/checkout@v5
