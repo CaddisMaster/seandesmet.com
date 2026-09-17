@@ -87,6 +87,14 @@ scripts/check-stack.sh        # THE gate — one file, run by both workflows
 - **No third-party requests without an issue that says why** — web fonts, analytics, CDNs. The
   page is currently zero-dependency, which is part of why it is fast and part of why it cannot
   break
+- ⚠️ **The Budget Buddy screenshot is SAMPLE DATA and must stay that way** (#25). It is a WebP
+  `data:` URI of the local dev stack, logged in as a `portfolio-demo` user created by budget-buddy's
+  `scripts/seed_dev.py` — never a real account, never production. To retake it: seed that user
+  (`docker compose exec web python scripts/seed_dev.py --username portfolio-demo`, `--force` to
+  reset), capture Home at 1280px in dark mode, crop to the top 745px, encode WebP ~0.8.
+  ⚠️ **Loading Home can make a billed model call**: when the month has no cached AI read, the page's
+  own script requests one right after load. Nothing in the markup looks like it — it cost one call
+  the first time. Retake against a user whose month already has a read, or with the AI key unset
 - ⚠️ **This repo is public.** No email address, phone number or home address in markup —
   LinkedIn is the contact route (#7). Nothing from `CLAUDE.local.md` belongs in any tracked file
 
