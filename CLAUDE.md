@@ -161,6 +161,7 @@ screen.
 |---|---|
 | `CLAUDE.md` and `.gitignore` | #3 (closes #1) |
 | **GitHub** link in the header; Budget Buddy card links **Live** and **Source** separately | #4 (#2) |
+| The card's repo link as a labelled **GitHub** button with the mark, replacing "Source" — Sean's pick over showing the repo path | #18 (#17) |
 | **LinkedIn** link — and an email link, since removed | #6 (#5), #8 (#7) |
 | Accessibility: `h1`/landmarks, Details `aria-expanded`, four contrast failures fixed, reduced motion | #10 (#9) |
 | Metadata: description, Open Graph, `twitter:card`, canonical, `theme-color`, "SD" favicon `data:` URI | #12 (#11) |
