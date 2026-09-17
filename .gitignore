@@ -1,0 +1,6 @@
+# Local-only Claude Code context: Droplet access, vault paths, personal cadence.
+# CLAUDE.md itself IS tracked — it is the project's onboarding doc. Same line as
+# budget-buddy, and this repo is public too.
+CLAUDE.local.md
+.claude/settings.local.json
+.claude/worktrees/
