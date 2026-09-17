@@ -249,6 +249,9 @@ budget-buddy#299 step 6 — a separate PR in that repo, after this is all done.
 
 ## 9. Security headers (#29)
 
+✅ **Applied 2026-09-17** and verified live (#29). Kept here as the record of what is on the box, and
+for a rebuild; re-running it is harmless.
+
 Added after the split — run it once, any time after §8. Like everything in this file it runs
 **from the Mac**, and nothing here touches `budget.seandesmet.com`: only the `seandesmet.com` site
 file changes.
