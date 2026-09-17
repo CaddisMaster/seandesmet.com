@@ -15,7 +15,7 @@ Split out of `CaddisMaster/budget-buddy` under budget-buddy#299.
 >
 > | Before you… | Read |
 > |---|---|
-> | start a session — reconcile against `git log` / `gh issue list --milestone Revamp` | §Current status below |
+> | start a session — reconcile against `git log` / `gh issue list` | §Current status below |
 > | edit `index.html` | §Non-negotiables below |
 > | rename a class, restructure the stack tags, or edit `.github/workflows/deploy.yml` | the `check` job in [`deploy.yml`](.github/workflows/deploy.yml) |
 > | add any file the page loads (CSS, JS, image, favicon, PDF) | §Non-negotiables → "Only `index.html` reaches the box" |
@@ -153,43 +153,45 @@ budget-buddy's `/wrap`, minus what does not exist here:
 
 ## The Revamp
 
-**Goal:** the page should read as a professional portfolio — a visitor learns who Sean is, what
-Sean builds, and where to see the code, within one screen.
+✅ **Shipped 2026-09-16; milestone closed.** **Goal:** the page should read as a professional
+portfolio — a visitor learns who Sean is, what Sean builds, and where to see the code, within one
+screen.
 
-Direction, each item its own issue under the `Revamp` milestone as it is picked up:
+| Item | Shipped |
+|---|---|
+| `CLAUDE.md` and `.gitignore` | #3 (closes #1) |
+| **GitHub** link in the header; Budget Buddy card links **Live** and **Source** separately | #4 (#2) |
+| **LinkedIn** link — and an email link, since removed | #6 (#5), #8 (#7) |
+| Accessibility: `h1`/landmarks, Details `aria-expanded`, four contrast failures fixed, reduced motion | #10 (#9) |
+| Metadata: description, Open Graph, `twitter:card`, canonical, `theme-color`, "SD" favicon `data:` URI | #12 (#11) |
+| **About** section, and labelled About / Projects sections | #14 (#13) |
 
-- **Header / identity** — name as the `<h1>`, a one-line positioning statement, and links:
-  **GitHub** (#2) and **LinkedIn** (#5) — ✅ both live
-- **Projects** — each card links **Live** and **Source** separately (Budget Buddy →
-  https://budget.seandesmet.com and https://github.com/CaddisMaster/budget-buddy)
-- **About** — short, first-person, specific
-- **Metadata** — `<meta name="description">`, Open Graph / Twitter card, canonical URL,
-  `theme-color`, and a favicon as a `data:` URI (see "Only `index.html` reaches the box")
-- **Polish** — the accessibility items in §Non-negotiables (the current Details toggle has no
-  `aria-expanded`), `prefers-reduced-motion`, no hardcoded copyright year to go stale
+**Sean's decisions, 2026-09-16 — standing, and the copy is Sean's, not a session's to rewrite:**
 
-**Open questions — Sean's call, not a session's.** Do not guess these into the markup:
+- **Contact is LinkedIn only — no email.** #5 added one and #7 removed it: a published address
+  draws spam
+- **No résumé and no photo** — so nothing needs to change about the single-file deploy
+- **The headline stays "Full stack projects."** Three alternatives were offered and declined. The
+  `<title>`, description and Open Graph tags are built from it, so a headline change touches all
+  of them
+- **The About text** is the one Sean chose from three drafts. Change it only on Sean's say-so
+- **No `og:image`** — it would be a separate deployed file, and link unfurlers reject `data:` URIs
 
-- The positioning line: what role or kind of work should a visitor take away?
-
-**Decided 2026-09-16:** contact is **LinkedIn only — no email** (#5 added one, #7 removed it:
-a published address draws spam). **No résumé and no photo**, so the Revamp needs no change to
-the single-file deploy.
-
-**Standing decisions that must not be re-opened:** the contact and résumé/photo decisions
-above; one file, no build step, no framework; no changelog and no Releases; history was not
-subtree-split from budget-buddy; the deploy key is not Budget Buddy's and never will be; never
-re-run certbot or copy a lineage name out of a document.
+**Standing decisions that must not be re-opened:** the decisions above; one file, no build step,
+no framework; no changelog and no Releases; history was not subtree-split from budget-buddy; the
+deploy key is not Budget Buddy's and never will be; never re-run certbot or copy a lineage name out
+of a document.
 
 ## Current status
 
-⚠️ **This section lags `main` by construction.** Reconcile against `git log` and
-`gh issue list --milestone Revamp` at the start of every session. An open issue is not evidence of
-open work — **read the comments**, not just the body, before proposing one.
+⚠️ **This section lags `main` by construction.** Reconcile against `git log` and `gh issue list` at
+the start of every session. An open issue is not evidence of open work — **read the comments**, not
+just the body, before proposing one.
 
-- **2026-09-16:** the live page is byte-identical to `index.html` on `main`; last Deploy run green
-  2026-08-25. The `Revamp` milestone is open (#1 this file, #2 GitHub link). The revamp's open
-  questions above are unanswered
+- **2026-09-16:** the Revamp shipped across PRs #3–#14 and its milestone is **closed**. **No
+  milestone is open** — the next body of work opens one. The live page on both hostnames was
+  byte-identical to `index.html` on `main` after every merge, and every Deploy run was green
+- **Nothing is broken and waiting.** Anything next is new scope, and new scope starts with an issue
 
 ## Maintainer notes (local only)
 
