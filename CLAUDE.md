@@ -227,10 +227,16 @@ the start of every session. An open issue is not evidence of open work — **rea
 just the body, before proposing one.
 
 - **2026-09-16:** the Revamp shipped across PRs #3–#20 — content, accessibility, metadata, then
-  the "Engineer's notebook" redesign (#20) — and its milestone is **closed**. **No milestone is
-  open**; the next body of work opens one. After every merge the Deploy run was green and both
-  hostnames were byte-identical to `index.html` on `main`; after #20 the live page was also
-  rendered to confirm the embedded fonts load in production (nginx sends no CSP that blocks them)
+  the "Engineer's notebook" redesign (#20) — and its milestone is **closed**
+- **2026-09-17:** **Showcase and hardening** shipped and its milestone is **closed**: PR checks and
+  `main` protection (#23 → #24), the Budget Buddy screenshot with sample data (#25 → #26), the
+  Material List Import Tool outline card (#27 → #28), and security headers (#29 → #30).
+  ✅ **`SETUP.md` §9 is APPLIED on the box** — run by Sean from the Mac on 2026-09-17 and verified
+  live: all seven headers on both hostnames and on a 404, no nginx version, `charset=utf-8`, and the
+  live page rendered under the real CSP with zero violations. budget.seandesmet.com was unaffected.
+  ⚠️ So the CSP is **live**: `scripts/check-csp.sh` is guarding a real policy, not a planned one
+- **No milestone is open**; the next body of work opens one. After every merge the Deploy run was
+  green and both hostnames were byte-identical to `index.html` on `main`
 - **Nothing is broken and waiting.** Anything next is new scope, and new scope starts with an issue
 
 ## Maintainer notes (local only)
