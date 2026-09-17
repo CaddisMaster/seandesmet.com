@@ -78,8 +78,8 @@ CLAUDE.md                     # this file
 - **No third-party requests without an issue that says why** — web fonts, analytics, CDNs. The
   page is currently zero-dependency, which is part of why it is fast and part of why it cannot
   break
-- ⚠️ **This repo is public.** No phone number, home address or personal email in markup unless
-  Sean has decided to publish it. Nothing from `CLAUDE.local.md` belongs in any tracked file
+- ⚠️ **This repo is public.** No email address, phone number or home address in markup —
+  LinkedIn is the contact route (#7). Nothing from `CLAUDE.local.md` belongs in any tracked file
 
 **Process**
 - **Verify locally before every PR** (below). There is no test suite; the gate only checks the
@@ -159,7 +159,7 @@ Sean builds, and where to see the code, within one screen.
 Direction, each item its own issue under the `Revamp` milestone as it is picked up:
 
 - **Header / identity** — name as the `<h1>`, a one-line positioning statement, and links:
-  **GitHub** (https://github.com/CaddisMaster, #2) plus whatever else Sean chooses to publish
+  **GitHub** (#2) and **LinkedIn** (#5) — ✅ both live
 - **Projects** — each card links **Live** and **Source** separately (Budget Buddy →
   https://budget.seandesmet.com and https://github.com/CaddisMaster/budget-buddy)
 - **About** — short, first-person, specific
@@ -170,14 +170,16 @@ Direction, each item its own issue under the `Revamp` milestone as it is picked 
 
 **Open questions — Sean's call, not a session's.** Do not guess these into the markup:
 
-- Which contact routes are public: email, LinkedIn, a contact form, none?
-- A résumé — linked PDF (needs the deploy change above), or not at all?
-- A photo?
 - The positioning line: what role or kind of work should a visitor take away?
 
-**Standing decisions that must not be re-opened:** one file, no build step, no framework; no
-changelog and no Releases; history was not subtree-split from budget-buddy; the deploy key is not
-Budget Buddy's and never will be; never re-run certbot or copy a lineage name out of a document.
+**Decided 2026-09-16:** contact is **LinkedIn only — no email** (#5 added one, #7 removed it:
+a published address draws spam). **No résumé and no photo**, so the Revamp needs no change to
+the single-file deploy.
+
+**Standing decisions that must not be re-opened:** the contact and résumé/photo decisions
+above; one file, no build step, no framework; no changelog and no Releases; history was not
+subtree-split from budget-buddy; the deploy key is not Budget Buddy's and never will be; never
+re-run certbot or copy a lineage name out of a document.
 
 ## Current status
 
