@@ -197,9 +197,11 @@ of a document.
 the start of every session. An open issue is not evidence of open work — **read the comments**, not
 just the body, before proposing one.
 
-- **2026-09-16:** the Revamp shipped across PRs #3–#14 and its milestone is **closed**. **No
-  milestone is open** — the next body of work opens one. The live page on both hostnames was
-  byte-identical to `index.html` on `main` after every merge, and every Deploy run was green
+- **2026-09-16:** the Revamp shipped across PRs #3–#20 — content, accessibility, metadata, then
+  the "Engineer's notebook" redesign (#20) — and its milestone is **closed**. **No milestone is
+  open**; the next body of work opens one. After every merge the Deploy run was green and both
+  hostnames were byte-identical to `index.html` on `main`; after #20 the live page was also
+  rendered to confirm the embedded fonts load in production (nginx sends no CSP that blocks them)
 - **Nothing is broken and waiting.** Anything next is new scope, and new scope starts with an issue
 
 ## Maintainer notes (local only)
