@@ -17,7 +17,7 @@ Split out of `CaddisMaster/budget-buddy` under budget-buddy#299.
 > |---|---|
 > | start a session — reconcile against `git log` / `gh issue list` | §Current status below |
 > | edit `index.html` | §Non-negotiables below |
-> | rename a class, restructure the stack tags, or edit `.github/workflows/deploy.yml` | the `check` job in [`deploy.yml`](.github/workflows/deploy.yml) |
+> | rename a class, restructure the stack tags, or edit a workflow | [`scripts/check-stack.sh`](scripts/check-stack.sh), and the branch protection note in §Git & development workflow |
 > | add any file the page loads (CSS, JS, image, favicon, PDF) | §Non-negotiables → "Only `index.html` reaches the box" |
 > | write a claim about Budget Buddy's features or stack | budget-buddy's `CLAUDE.md` §Tech Stack |
 > | run anything on the Droplet | [`SETUP.md`](SETUP.md) — from a **Mac terminal**, never from the VM |
@@ -34,6 +34,7 @@ Split out of `CaddisMaster/budget-buddy` under budget-buddy#299.
 - **Serving:** Nginx on the Droplet, web root `/var/www/seandesmet.com`, Let's Encrypt certificate
   with its own lineage (separate from `budget.seandesmet.com`)
 - **Deploy:** GitHub Actions (`deploy.yml`) → SSH with a key restricted to one forced command
+- **Checks:** `scripts/check-stack.sh`, run on every PR (`check.yml`) and again before every deploy
 
 ## Project map
 
@@ -43,12 +44,15 @@ README.md                     # why the repo exists, how deploy works, certifica
 SETUP.md                      # one-time Droplet setup runbook (run from a Mac)
 CLAUDE.md                     # this file
 .github/workflows/deploy.yml  # stack-tag gate → copy to Droplet → byte-for-byte live verify
+.github/workflows/check.yml   # the same gate on every pull request
+scripts/check-stack.sh        # THE gate — one file, run by both workflows
 ```
 
 ## Non-negotiables
 
 **Merging to `main` IS the deploy**
-- A push to `main` touching `index.html` or `deploy.yml` deploys within a minute. There is **no
+- A push to `main` touching `index.html`, `deploy.yml` or `scripts/check-stack.sh` deploys within a
+  minute. There is **no
   Release gate** as budget-buddy has — so there is no "merge now, finish later"
 - ⚠️ **Every merged PR must leave the live page presentable.** Build the revamp in slices that
   each stand on their own. **Not a long-lived `revamp` branch** — budget-buddy avoids those for
@@ -66,7 +70,8 @@ CLAUDE.md                     # this file
   change is run by Sean from a Mac, not from a session
 
 **The deploy gate reads the markup**
-- The `check` job greps `<span class="stack-tag">…</span>` and **fails if fewer than 5 match**.
+- `scripts/check-stack.sh` greps `<span class="stack-tag">…</span>` and **fails if fewer than 5
+  match**.
   A redesign that renames that class or restructures the tags fails the deploy with a message
   about the selector. Change the check **in the same PR** as the markup, and keep its
   "matched nothing" assertion — an absence check that cannot fail is worse than none
@@ -106,25 +111,26 @@ Look at it, rather than assuming — CI never renders the page:
 - keyboard only: Tab through every link and button, and operate every toggle
 - every link goes where it says
 
-If the change touches the stack tags or their markup, run the `check` job's script from
-`deploy.yml` against the working tree before pushing.
+If the change touches the stack tags or their markup, run `scripts/check-stack.sh` before pushing.
+It takes a path, so its failure paths can be exercised on a scratch copy without editing the page.
 
 ## Git & development workflow
 
 Same rule as budget-buddy. Rationale lives in budget-buddy's `CONTRIBUTING.md` §2.
 
-**Issue → branch → PR → squash-merge.** Do not work directly on `main`. ⚠️ `main` has **no branch
-protection**, so this holds by convention only — nothing stops a direct push, and a direct push
-to `index.html` deploys.
+**Issue → branch → PR → squash-merge.** `main` is **protected** (#23): a direct push is rejected,
+admins included, and a PR cannot merge until **The tech stack names nothing retired** passes.
+⚠️ The protection rule requires that check **by its job name** — renaming the job in `check.yml`
+without updating the rule leaves every PR waiting on a check that never reports. There is no
+approval requirement: a sole maintainer cannot approve their own PR.
 
 1. **Every change starts from an issue** — no issueless PRs. Feature issues carry Gherkin
    acceptance criteria. Assign the open milestone
 2. **Branch** off `main` as `<issue#>-short-slug`
 3. **Verify locally** (above)
-4. **Open a PR** with `Closes #<issue>`, one line per issue, and squash-merge.
-   ⚠️ **A PR here runs no checks at all** — `deploy.yml` triggers only on a push to `main`, so the
-   stack-tag gate meets a change for the first time *after* merge. A PR with no red X has not
-   passed anything. (A gate failure does block the deploy, so the old page keeps serving.)
+4. **Open a PR** with `Closes #<issue>`, one line per issue, and squash-merge once the check is
+   green. The gate only reads the stack tags — a green PR says nothing about how the page looks,
+   which is why step 3 exists
 5. **After merge, check the Deploy run on `main`**: `gh run list --workflow Deploy --limit 1`.
    A green run means the live page is byte-identical to `index.html`. Read a red one before
    re-running it

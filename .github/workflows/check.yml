@@ -1,0 +1,26 @@
+name: Check
+
+# The stack-tag gate, run on every pull request so a PR meets it BEFORE merge.
+# Until #23 it ran only in deploy.yml, on a push to main: a bad change was
+# caught after merging, with main already red.
+#
+# No path filter, deliberately. Branch protection requires this check by name,
+# and a required check that never runs leaves the PR waiting forever — so a
+# docs-only PR must run it too. It takes seconds.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    # ⚠️ Branch protection on main requires a check with EXACTLY this name.
+    # Renaming the job means updating the protection rule in the same change.
+    name: The tech stack names nothing retired
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: No stack tag names a retired library
+        run: scripts/check-stack.sh
