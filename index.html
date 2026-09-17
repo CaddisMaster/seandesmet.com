@@ -189,6 +189,8 @@
 
     /* ---- project card ---- */
 
+    .project + .project { margin-top: 0.75rem; }
+
     .project {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -236,6 +238,8 @@
 
     .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
 
+    .dot-muted { background: var(--muted); }
+
     /* width/height attributes plus height:auto reserve the box before the
        image decodes, so the card does not jump. The image is dark in both
        page themes on purpose: it is Budget Buddy as it looks, not restyled. */
@@ -275,6 +279,37 @@
     .flow .node { padding: 6px 12px; border: 1px solid var(--border-strong); border-radius: 6px; }
 
     .flow svg { width: 16px; height: 16px; stroke: var(--accent); }
+
+    .flow-group { display: flex; flex-direction: column; gap: 10px; }
+
+    .flow-note {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+
+    .flow-note svg { width: 14px; height: 14px; color: var(--accent); }
+
+    .result {
+      padding: 16px 20px;
+      background: var(--inset);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .result-text { font-size: 1.0625rem; line-height: 1.6; color: var(--text-2); }
+
+    .result-text strong { font-weight: 600; color: var(--text); }
+
+    .private-note {
+      font-family: var(--mono);
+      font-size: 0.8125rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
 
     .two-col {
       display: grid;
@@ -380,6 +415,9 @@
       .two-col { grid-template-columns: 1fr; gap: 1rem; }
       .feat { font-size: 0.875rem; line-height: 1.95; }
       .card-foot { flex-direction: column; align-items: stretch; border-top: 0; padding-top: 0; }
+      .result { padding: 14px 16px; }
+      .result-text { font-size: 0.9375rem; }
+      .private-note { white-space: normal; }
       .actions { display: grid; grid-template-columns: 1fr 1fr; }
     }
 
@@ -488,6 +526,72 @@
               <a class="btn" href="https://github.com/CaddisMaster/budget-buddy" aria-label="Budget Buddy on GitHub"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>GitHub</a>
               <a class="btn btn-primary" href="https://budget.seandesmet.com" aria-label="Budget Buddy live site">Live site<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
             </div>
+          </div>
+        </article>
+
+        <!-- Outline only (#27). The repository is private and the employer is
+             deliberately unnamed; no screenshot may ever go here, because a
+             useful one is a real builder's takeoff. Every claim below comes
+             from that project's own README — check it there before editing. -->
+        <article class="project" aria-labelledby="mlit-title">
+          <div class="card-intro">
+            <div class="card-head">
+              <h3 class="card-title" id="mlit-title">Material List Import Tool</h3>
+              <span class="status"><span class="dot dot-muted" aria-hidden="true"></span>private</span>
+            </div>
+            <p class="card-desc">Turns a builder&#39;s takeoff — an Excel material list for a house — into a CSV the point-of-sale system can import. It matches free-text descriptions to item numbers, a person reviews every line, and a catalog learns from each confirmation so the same line never needs matching twice.</p>
+          </div>
+
+          <div class="flow-group">
+            <ol class="flow" aria-label="Pipeline">
+              <li><span class="node">upload</span></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="node">parse</span></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="node">match</span></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="node">review</span></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="node">csv</span></li>
+            </ol>
+            <p class="flow-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 0 1 15.3-6.4L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.3 6.4L3 16M3 21v-5h5"/></svg>every confirmation teaches the catalog</p>
+          </div>
+
+          <div class="result">
+            <p class="list-label">first run · empty catalog</p>
+            <p class="result-text">A 144-line house to import-ready CSV in <strong>9 minutes</strong>, on <strong>2 model calls</strong>, for <strong>16¢</strong> — with <strong>99%</strong> of the AI&#39;s proposals accepted unchanged.</p>
+          </div>
+
+          <div class="two-col">
+            <div>
+              <p class="list-label" id="mlit-features">features</p>
+              <ul class="feat" aria-labelledby="mlit-features">
+                <li>.xlsx, .xls and .csv upload</li>
+                <li>AI parsing; repeat layouts need no call</li>
+                <li>Catalog match first, AI only for the rest</li>
+                <li>Confidence-scored proposals</li>
+                <li>A person reviews every line</li>
+                <li>Reports: time saved, match rate, AI cost</li>
+              </ul>
+            </div>
+            <div>
+              <p class="list-label" id="mlit-eng">engineering</p>
+              <ul class="feat" aria-labelledby="mlit-eng">
+                <li>Tests never call the real API (enforced)</li>
+                <li>Protected main, required CI checks</li>
+                <li>Non-root Docker image</li>
+                <li>Forward-only migrations</li>
+                <li>CSRF, rate limiting, CSV-injection guard</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card-foot">
+            <ul class="stack-row" aria-label="Tech stack">
+              <li><span class="stack-tag">Python</span></li>
+              <li><span class="stack-tag">Flask</span></li>
+              <li><span class="stack-tag">PostgreSQL</span></li>
+              <li><span class="stack-tag">HTMX</span></li>
+              <li><span class="stack-tag">Claude API</span></li>
+              <li><span class="stack-tag">Docker</span></li>
+            </ul>
+            <p class="private-note"><span aria-hidden="true">// </span>private repository · not publicly deployed</p>
           </div>
         </article>
       </section>
