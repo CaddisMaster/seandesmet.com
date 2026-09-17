@@ -25,8 +25,12 @@ Split out of `CaddisMaster/budget-buddy` under budget-buddy#299.
 
 ## Tech stack
 
-- **Page:** one hand-written `index.html` — inline `<style>`, inline `<script>`, system font stack,
-  light/dark via `prefers-color-scheme`
+- **Page:** one hand-written `index.html` — inline `<style>`, no JavaScript, light/dark via
+  `prefers-color-scheme` (both token sets in `:root`), the "Engineer's notebook" design (#19)
+- **Fonts:** IBM Plex Sans and JetBrains Mono, **embedded as base64** — Google Fonts' own Latin
+  subset files, **unmodified**. ⚠️ Do not re-subset or optimise them: IBM Plex carries the Reserved
+  Font Name "Plex" under the OFL, so a modified copy could not keep the name. The subsets have no
+  `→` or `↗`, which is why those arrows are inline SVG
 - **Serving:** Nginx on the Droplet, web root `/var/www/seandesmet.com`, Let's Encrypt certificate
   with its own lineage (separate from `budget.seandesmet.com`)
 - **Deploy:** GitHub Actions (`deploy.yml`) → SSH with a key restricted to one forced command
@@ -56,7 +60,7 @@ CLAUDE.md                     # this file
   `index.html`**, whatever the tarball contains. The live verify then compares **only
   `index.html`** — so a `style.css`, `favicon.svg`, headshot or résumé PDF added beside it is
   **dropped silently while the deploy goes green**, and the live page shows a broken reference
-- So: CSS and JS stay inline; icons are inline `<svg>`; a favicon or small image is a `data:` URI.
+- So: CSS stays inline; icons are inline `<svg>`; fonts, the favicon or a small image are `data:` URIs.
   Anything genuinely too big to inline (a résumé PDF, a photo) needs its **own issue** that changes
   the workflow, `SETUP.md` §2's receiving script, *and* the verify step together — the script
   change is run by Sean from a Mac, not from a session
@@ -166,6 +170,7 @@ screen.
 | Accessibility: `h1`/landmarks, Details `aria-expanded`, four contrast failures fixed, reduced motion | #10 (#9) |
 | Metadata: description, Open Graph, `twitter:card`, canonical, `theme-color`, "SD" favicon `data:` URI | #12 (#11) |
 | **About** section, and labelled About / Projects sections | #14 (#13) |
+| **Redesign — "Engineer's notebook"**: dot-grid ground, Plex Sans + JetBrains Mono embedded, request-path diagram on the card, light and dark token sets | #20 (#19) |
 
 **Sean's decisions, 2026-09-16 — standing, and the copy is Sean's, not a session's to rewrite:**
 
@@ -177,6 +182,9 @@ screen.
   of them
 - **The About text** is the one Sean chose from three drafts. Change it only on Sean's say-so
 - **No `og:image`** — it would be a separate deployed file, and link unfurlers reject `data:` URIs
+- **The look is direction B, "Engineer's notebook"**, chosen over an editorial serif and a split
+  two-column layout. Dark is the design's home; the light set was derived from it
+- **Fonts are embedded, not linked** — no request to Google or anyone else
 
 **Standing decisions that must not be re-opened:** the decisions above; one file, no build step,
 no framework; no changelog and no Releases; history was not subtree-split from budget-buddy; the
