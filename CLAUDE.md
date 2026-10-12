@@ -21,6 +21,7 @@ Split out of `CaddisMaster/budget-buddy` under budget-buddy#299.
 > | add any file the page loads (CSS, JS, image, favicon, PDF) | §Non-negotiables → "Only `index.html` reaches the box" |
 > | add a `<script>`, a web-font or stylesheet link, an external image, or change a response header | [`scripts/check-csp.sh`](scripts/check-csp.sh) and [`SETUP.md`](SETUP.md) §9 — the CSP blocks it otherwise |
 > | write a claim about Budget Buddy's features or stack | budget-buddy's `CLAUDE.md` §Tech Stack |
+> | write a claim about Orbit Ops' features or stack | orbit-ops' `README.md` and `CLAUDE.md` §Tech stack |
 > | run anything on the Droplet | [`SETUP.md`](SETUP.md) — from a **Mac terminal**, never from the VM |
 > | touch certificates or the nginx site file | [`README.md`](README.md) §Certificates and `SETUP.md` §5 |
 
@@ -81,7 +82,8 @@ scripts/check-csp.sh          # the page side of the server's CSP — same two w
   about the selector. Change the check **in the same PR** as the markup, and keep its
   "matched nothing" assertion — an absence check that cannot fail is worse than none
 - The stack tags are **factual claims about each project**. Check them against that project's own
-  docs (budget-buddy's `CLAUDE.md`; material-list-import-tool's `README.md` §Tech stack) before
+  docs (budget-buddy's `CLAUDE.md`; orbit-ops' `CLAUDE.md` §Tech stack;
+  material-list-import-tool's `README.md` §Tech stack) before
   writing one — the page advertised Chart.js for four releases after the app
   dropped it (budget-buddy#291)
 
@@ -235,6 +237,9 @@ just the body, before proposing one.
   live: all seven headers on both hostnames and on a 404, no nginx version, `charset=utf-8`, and the
   live page rendered under the real CSP with zero violations. budget.seandesmet.com was unaffected.
   ⚠️ So the CSP is **live**: `scripts/check-csp.sh` is guarding a real policy, not a planned one
+- **2026-10-12:** the **Orbit Ops** card (#33), between Budget Buddy and the Material List
+  Import Tool. Its screenshot is orbit-ops' own README image `docs/img/desk.png` (already
+  public), re-encoded as WebP q90; every claim is from that repo's `README.md` and `CLAUDE.md`
 - **No milestone is open**; the next body of work opens one. After every merge the Deploy run was
   green and both hostnames were byte-identical to `index.html` on `main`
 - **Nothing is broken and waiting.** Anything next is new scope, and new scope starts with an issue
