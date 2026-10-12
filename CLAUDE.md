@@ -182,8 +182,10 @@ budget-buddy's `/wrap`, minus what does not exist here:
 
 1. PR open for the locally verified unit(s), `Closes #n`
 2. Merged → Deploy run on `main` checked, not assumed
-3. **Notes in ONE pass, at the very end** — where they live is in `CLAUDE.local.md`. Not present
-   means a fresh clone; skip it and say so
+3. **No session notes — by design.** This is a personal site, not a project (Sean, 2026-10-12):
+   no vault folder, no diary, no `CLAUDE.local.md`. What a session did is recorded in
+   §Current status here and in the issues and PRs. Update §Current status in the PR that ships
+   the work, not in a follow-up
 4. Report in three or four lines: what merged, what is live, what is still open, what next
 
 ## The Revamp
@@ -239,14 +241,16 @@ just the body, before proposing one.
   ⚠️ So the CSP is **live**: `scripts/check-csp.sh` is guarding a real policy, not a planned one
 - **2026-10-12:** the **Orbit Ops** card (#33), between Budget Buddy and the Material List
   Import Tool. Its screenshot is orbit-ops' own README image `docs/img/desk.png` (already
-  public), re-encoded as WebP q90; every claim is from that repo's `README.md` and `CLAUDE.md`
+  public), re-encoded as WebP q90; every claim is from that repo's `README.md` and `CLAUDE.md`.
+  Then the `description` and `og:description` named both live projects (#35 → #36). Both
+  changes are in the **Orbit Ops** milestone, which is **closed**
 - **No milestone is open**; the next body of work opens one. After every merge the Deploy run was
   green and both hostnames were byte-identical to `index.html` on `main`
 - **Nothing is broken and waiting.** Anything next is new scope, and new scope starts with an issue
 
-## Maintainer notes (local only)
+## Maintainer notes
 
-The maintainer's notes, Droplet access and vault paths live in the gitignored `CLAUDE.local.md`,
-not in this repo — same line as budget-buddy. The standing rule it carries is **do all
-note-writing in ONE pass at the very end of a session**. A fresh clone is fully functional
-without it.
+**There are none, deliberately** — see §End of session step 3. `CLAUDE.local.md` stays in
+`.gitignore` so that one created by mistake can never be committed, but this repo does not use it.
+Droplet access is in budget-buddy's `CLAUDE.local.md`, and the Droplet runbook is
+[`SETUP.md`](SETUP.md).
