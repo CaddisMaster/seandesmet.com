@@ -4,3 +4,7 @@
 CLAUDE.local.md
 .claude/settings.local.json
 .claude/worktrees/
+
+# JetBrains (PyCharm). Per-machine project state: absolute paths, window
+# layout. Nothing in it is shared, so all of it is ignored.
+.idea/
