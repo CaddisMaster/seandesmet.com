@@ -8,3 +8,6 @@ CLAUDE.local.md
 # JetBrains (PyCharm). Per-machine project state: absolute paths, window
 # layout. Nothing in it is shared, so all of it is ignored.
 .idea/
+
+# VS Code. Same reasoning: this repo shares no editor settings.
+.vscode/
