@@ -1,0 +1,8 @@
+# Pinned exactly (#44), the same versions as droplet-infra's at its pin. www_site
+# itself needs neither: infra/test.sh needs them for the lxd connection and for the
+# host layer. It installs them into infra/ansible/collections/, which is gitignored.
+collections:
+  - name: community.general   # the lxd connection, ufw, timezone
+    version: "13.5.0"
+  - name: ansible.posix       # authorized_key
+    version: "2.2.2"

@@ -1,0 +1,8 @@
+# seandesmet.com's layer of the shared Droplet (#44). The host layer under it is
+# droplet-infra's: this playbook never runs that role, so nothing here can change
+# what the host or another tenant's site depends on.
+- name: seandesmet.com on the Droplet
+  hosts: droplet
+  become: true
+  roles:
+    - www_site

@@ -1,7 +1,6 @@
-# The site file is production's, byte for byte. This role writes that file, its
-# enabled link and the empty web root, and nothing else: the page arrives through
-# landing-deploy, and the headers snippet is the other repo's (SETUP.md §9), so it
-# is only checked. Writing it could change the live site's headers.
+# The site file, the snippet and landing-deploy are production's, byte for byte
+# (compared on the Droplet 2026-11-03, #44). This role never writes the page, which
+# arrives through landing-deploy, or the certificate, which it only checks.
 - name: The web root
   ansible.builtin.file:
     path: "{{ www_site_root }}"
@@ -10,28 +9,46 @@
     group: "{{ www_site_user }}"
     mode: "0755"
 
-- name: Look at the files the www site names
+- name: Look at the certificate files the www site names
   ansible.builtin.stat:
     path: "{{ item }}"
     get_checksum: false
   loop:
-    - "{{ www_site_snippet }}"
     - /etc/letsencrypt/live/{{ www_site_name }}/fullchain.pem
     - /etc/letsencrypt/live/{{ www_site_name }}/privkey.pem
     - /etc/letsencrypt/options-ssl-nginx.conf
     - /etc/letsencrypt/ssl-dhparams.pem
   register: www_site_files
 
-- name: The www site's files exist
+- name: The www site's certificate files exist
   ansible.builtin.assert:
     that: item.stat.exists
     fail_msg: >-
-      {{ item.item }} is missing. This role writes neither the certificate nor the
-      headers snippet: see RUNBOOK §4 and seandesmet.com's SETUP.md §9, then run again.
+      {{ item.item }} is missing. This role doesn't write the certificate: see
+      budget-buddy's RUNBOOK §4, then run again.
     quiet: true
   loop: "{{ www_site_files.results }}"
   loop_control:
     label: "{{ item.item }}"
+
+# The contract with index.html: scripts/check-csp.sh enforces the page's side.
+- name: The headers snippet
+  ansible.builtin.copy:
+    src: seandesmet-security-headers.conf
+    dest: "{{ www_site_snippet }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: www site changed
+
+# The only thing the landing deploy key can run, so it is a security boundary.
+- name: The deploy's forced command
+  ansible.builtin.copy:
+    src: landing-deploy
+    dest: "{{ www_site_landing_deploy }}"
+    owner: root
+    group: root
+    mode: "0755"
 
 - name: The www site
   ansible.builtin.copy:
