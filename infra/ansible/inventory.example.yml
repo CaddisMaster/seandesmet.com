@@ -1,0 +1,7 @@
+# Copy to inventory.yml (gitignored) and fill in. No keys belong here: www_site
+# manages none, and this playbook doesn't run the host role that does.
+droplet:
+  hosts:
+    production:
+      ansible_host: 203.0.113.10   # a documentation address, not the Droplet's
+      ansible_user: root

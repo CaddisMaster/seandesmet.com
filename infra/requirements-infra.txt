@@ -1,0 +1,13 @@
+# The Ansible control node (#44). Installed into infra/.venv by infra/test.sh and
+# never onto the Droplet. Exact pins, transitive included: test.sh installs with
+# --no-deps and then runs `pip check`, so a dependency missing from this list fails
+# the run. ansible-core matches droplet-infra's at infra/host-role.pin's SHA.
+ansible-core==2.21.5
+cffi==2.1.1
+cryptography==50.0.2
+Jinja2==3.1.6
+MarkupSafe==3.0.4
+packaging==26.3
+pycparser==3.12
+PyYAML==6.0.3
+resolvelib==1.2.1

@@ -11,3 +11,11 @@ CLAUDE.local.md
 
 # VS Code. Same reasoning: this repo shares no editor settings.
 .vscode/
+
+# Ansible (#44). The real inventory holds the Droplet's address. The venv,
+# collections and droplet-infra's host layer are rebuilt from their pins by
+# infra/test.sh.
+infra/.venv/
+infra/ansible/inventory.yml
+infra/ansible/collections/
+infra/ansible/vendor/

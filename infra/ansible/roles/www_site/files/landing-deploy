@@ -1,0 +1,14 @@
+#!/bin/sh
+# The ONLY thing the landing deploy key can run. The client sends a tarball on
+# stdin and names no destination — this script decides where bytes land, so a
+# leaked key cannot write anywhere else.
+set -eu
+TMP=$(mktemp -d)
+trap "rm -rf \"$TMP\"" EXIT
+# Extract into a scratch dir, never straight into the web root: a crafted
+# tarball with ../ components is then contained, and a partial transfer never
+# leaves a half-written page being served.
+tar -xzf - -C "$TMP" --no-same-owner --no-same-permissions
+[ -f "$TMP/index.html" ] || { echo "landing-deploy: expected index.html" >&2; exit 1; }
+install -m 0644 "$TMP/index.html" /var/www/seandesmet.com/index.html
+echo "landing-deploy: installed index.html ($(stat -c%s "$TMP/index.html") bytes)" >&2
