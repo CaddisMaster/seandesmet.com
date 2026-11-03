@@ -251,11 +251,13 @@ just the body, before proposing one.
   changes are in the **Orbit Ops** milestone, which is **closed**
 - **2026-11-03:** the `www_site` role came from Budget Buddy with its history (#44), and now also
   owns the headers snippet and `landing-deploy`, after both compared byte-identical on production.
-  Nothing runs it for real: check mode from the Mac is the only thing that has touched production
-  That work is the **Droplet as code** milestone, which is **closed**
-- **No milestone is open**; the next body of work opens one. After every merge the Deploy run was
-  green and both hostnames were byte-identical to `index.html` on `main`
-- **Nothing is broken and waiting.** Anything next is new scope, and new scope starts with an issue
+  Nothing runs it automatically
+  Then the snippet's comment was corrected (#47), which was the playbook's first real run on
+  production
+- **The Droplet as code** milestone is **open**, on #46: `http://www.seandesmet.com/` returns 404
+  instead of redirecting. Everything else is live, and after every merge the Deploy run was green
+  and both hostnames were byte-identical to `index.html` on `main`
+- Anything else next is new scope, and new scope starts with an issue
 
 ## Maintainer notes
 
