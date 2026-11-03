@@ -43,8 +43,8 @@ and blocks Let's Encrypt, so TLS issuance isn't exercised. It checks that:
 3. `nginx -t` passes, and all three files and the web root match the role, with production's modes
 4. `landing-deploy`, run as `deploy`, refuses a tarball with no `index.html` and installs only
    `index.html` from one with extras
-5. Both hostnames serve that page with all of production's headers, exactly, and port 80 on the
-   apex redirects
+5. Both hostnames serve that page with all of production's headers, exactly, and redirect port 80
+   to HTTPS
 6. With all three files changed, check mode reports the drift and changes nothing, then a real run
    repairs them, reloads nginx and leaves the page alone
 
