@@ -14,6 +14,7 @@ server {
 
 server {
   if ($host = seandesmet.com) { return 301 https://$host$request_uri; }
+  if ($host = www.seandesmet.com) { return 301 https://$host$request_uri; }
   listen 80;
   server_name seandesmet.com www.seandesmet.com;
   return 404;

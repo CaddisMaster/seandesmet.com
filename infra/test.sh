@@ -160,8 +160,10 @@ for host in seandesmet.com www.seandesmet.com; do
     grep -qixF "$want" <<<"$headers" || die "https://$host/ lacks exactly: $want"
   done
 done
-redirect=$(ct curl -s -o /dev/null -w '%{http_code} %{redirect_url}' --resolve seandesmet.com:80:127.0.0.1 http://seandesmet.com/x)
-[[ $redirect == '301 https://seandesmet.com/x' ]] || die "port 80 does not redirect to HTTPS (got: $redirect)"
+for host in seandesmet.com www.seandesmet.com; do
+  redirect=$(ct curl -s -o /dev/null -w '%{http_code} %{redirect_url}' --resolve "$host:80:127.0.0.1" "http://$host/x")
+  [[ $redirect == "301 https://$host/x" ]] || die "http://$host/ does not redirect to HTTPS (got: $redirect)"
+done
 echo "ok: enabled, nginx -t passes, a page through landing-deploy serves with production's headers"
 
 # --- drift: production's check is only worth reading if it can fail ------------
