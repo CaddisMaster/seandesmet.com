@@ -59,15 +59,22 @@ copied nothing. Four things are needed on the `production` environment:
 ⚠️ **The key is restricted with a forced command.** The workflow sends a tarball on stdin and
 names no destination path, so the *server* decides where bytes land — and only `index.html` is
 ever written, whatever the tarball contains. That is what makes the key safe to hold in
-GitHub. Same shape as the backup pull's restricted key; the script is in `SETUP.md` §2.
+GitHub. Same shape as the backup pull's restricted key; the script is `infra/ansible/roles/www_site/files/landing-deploy`.
 
 ## Security headers
 
 nginx sends HSTS, a strict Content-Security-Policy and five more headers from a snippet on the box —
-**[`SETUP.md`](SETUP.md) §9** has the values, the steps and the rollback (#29).
+**[`SETUP.md`](SETUP.md) §9** has the reasoning, the steps and the rollback (#29), and
+`infra/ansible/roles/www_site/files/seandesmet-security-headers.conf` is the file itself (#44).
 
 ⚠️ **The CSP only allows inline styles and `data:` fonts and images.** The page is built that way on
 purpose, and `scripts/check-csp.sh` fails any PR that adds something the policy would block.
+
+## The Droplet as code
+
+[`infra/`](infra/README.md) holds this site's Ansible role, which came from Budget Buddy with its
+history (#44), on top of [`droplet-infra`](https://github.com/CaddisMaster/droplet-infra)'s host
+layer. Nothing runs it automatically, and a merge there deploys nothing.
 
 ## Certificates
 

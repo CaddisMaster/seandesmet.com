@@ -24,6 +24,7 @@ Split out of `CaddisMaster/budget-buddy` under budget-buddy#299.
 > | write a claim about Orbit Ops' features or stack | orbit-ops' `README.md` and `CLAUDE.md` §Tech stack |
 > | run anything on the Droplet | [`SETUP.md`](SETUP.md) — from a **Mac terminal**, never from the VM |
 > | touch certificates or the nginx site file | [`README.md`](README.md) §Certificates and `SETUP.md` §5 |
+> | change anything under `infra/`, or run `infra/test.sh` | [`infra/README.md`](infra/README.md) — warn Sean before an LXD run; a real run on production is Sean's call |
 
 ## Tech stack
 
@@ -40,6 +41,8 @@ Split out of `CaddisMaster/budget-buddy` under budget-buddy#299.
   and again before every deploy
 - **Response headers:** HSTS, a strict CSP and five more, from
   `/etc/nginx/snippets/seandesmet-security-headers.conf` on the box — `SETUP.md` §9 (#29)
+- **Infrastructure:** one Ansible role, `www_site`, on top of `droplet-infra`'s pinned host layer,
+  tested in LXD (#44). Nothing runs it automatically
 
 ## Project map
 
@@ -52,6 +55,7 @@ CLAUDE.md                     # this file
 .github/workflows/check.yml   # the same gate on every pull request
 scripts/check-stack.sh        # THE stack-tag gate — one file, run by both workflows
 scripts/check-csp.sh          # the page side of the server's CSP — same two workflows
+infra/                        # www_site role, its pins and LXD test — never deployed by a merge
 ```
 
 ## Non-negotiables
@@ -63,7 +67,7 @@ scripts/check-csp.sh          # the page side of the server's CSP — same two w
 - ⚠️ **Every merged PR must leave the live page presentable.** Build the revamp in slices that
   each stand on their own. **Not a long-lived `revamp` branch** — budget-buddy avoids those for
   good reasons (revert granularity, bisect, review), and they apply here unchanged
-- A PR touching only docs (`CLAUDE.md`, `README.md`, `SETUP.md`) triggers no deploy
+- A PR touching only docs (`CLAUDE.md`, `README.md`, `SETUP.md`) or `infra/` triggers no deploy
 
 **Only `index.html` reaches the box**
 - The workflow tars **only `index.html`**, and the forced command on the Droplet installs **only
@@ -72,7 +76,7 @@ scripts/check-csp.sh          # the page side of the server's CSP — same two w
   **dropped silently while the deploy goes green**, and the live page shows a broken reference
 - So: CSS stays inline; icons are inline `<svg>`; fonts, the favicon or a small image are `data:` URIs.
   Anything genuinely too big to inline (a résumé PDF, a photo) needs its **own issue** that changes
-  the workflow, `SETUP.md` §2's receiving script, *and* the verify step together — the script
+  the workflow, the role's `landing-deploy`, *and* the verify step together — the script
   change is run by Sean from a Mac, not from a session
 
 **The deploy gate reads the markup**
@@ -155,7 +159,8 @@ approval requirement: a sole maintainer cannot approve their own PR.
 3. **Verify locally** (above)
 4. **Open a PR** with `Closes #<issue>`, one line per issue, and squash-merge once the check is
    green. The gate only reads the stack tags — a green PR says nothing about how the page looks,
-   which is why step 3 exists
+   which is why step 3 exists. The one exception so far is #44, rebase-merged on Sean's say-so
+   because a squash would have erased the history it brought in
 5. **After merge, check the Deploy run on `main`**: `gh run list --workflow Deploy --limit 1`.
    A green run means the live page is byte-identical to `index.html`. Read a red one before
    re-running it
@@ -244,6 +249,10 @@ just the body, before proposing one.
   public), re-encoded as WebP q90; every claim is from that repo's `README.md` and `CLAUDE.md`.
   Then the `description` and `og:description` named both live projects (#35 → #36). Both
   changes are in the **Orbit Ops** milestone, which is **closed**
+- **2026-11-03:** the `www_site` role came from Budget Buddy with its history (#44), and now also
+  owns the headers snippet and `landing-deploy`, after both compared byte-identical on production.
+  Nothing runs it for real: check mode from the Mac is the only thing that has touched production
+  That work is the **Droplet as code** milestone, which is **closed**
 - **No milestone is open**; the next body of work opens one. After every merge the Deploy run was
   green and both hostnames were byte-identical to `index.html` on `main`
 - **Nothing is broken and waiting.** Anything next is new scope, and new scope starts with an issue

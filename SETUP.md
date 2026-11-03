@@ -7,6 +7,10 @@ file is meant to be run from the VM.
 Work top to bottom. **Nothing is removed until the replacement is verified serving**, so the
 old page keeps serving right up to §7, and §8 is the only irreversible step.
 
+Since #44, [`infra/`](infra/README.md) describes the end state of §2, §3, §5 and §9 as an Ansible
+role. This file stays as the record of how the box got there, and for what the role doesn't own:
+the deploy key (§1, §4), GitHub's settings (§6) and the certificate.
+
 ---
 
 ## 0. Set the variables and confirm you can reach the box
@@ -42,24 +46,11 @@ Two halves, two destinations: the **private** half goes into a GitHub secret (§
 
 ## 2. Install the receiving script (on the Droplet)
 
+The script is [`infra/ansible/roles/www_site/files/landing-deploy`](infra/ansible/roles/www_site/files/landing-deploy)
+(#44), and the role installs it. By hand, from a clone:
+
 ```sh
-ssh $DROPLET 'cat > /usr/local/bin/landing-deploy <<'"'"'EOF'"'"'
-#!/bin/sh
-# The ONLY thing the landing deploy key can run. The client sends a tarball on
-# stdin and names no destination — this script decides where bytes land, so a
-# leaked key cannot write anywhere else.
-set -eu
-TMP=$(mktemp -d)
-trap "rm -rf \"$TMP\"" EXIT
-# Extract into a scratch dir, never straight into the web root: a crafted
-# tarball with ../ components is then contained, and a partial transfer never
-# leaves a half-written page being served.
-tar -xzf - -C "$TMP" --no-same-owner --no-same-permissions
-[ -f "$TMP/index.html" ] || { echo "landing-deploy: expected index.html" >&2; exit 1; }
-install -m 0644 "$TMP/index.html" /var/www/seandesmet.com/index.html
-echo "landing-deploy: installed index.html ($(stat -c%s "$TMP/index.html") bytes)" >&2
-EOF
-chmod 755 /usr/local/bin/landing-deploy'
+ssh $DROPLET 'cat > /usr/local/bin/landing-deploy && chmod 755 /usr/local/bin/landing-deploy' < infra/ansible/roles/www_site/files/landing-deploy
 ```
 
 ⚠️ Only `index.html` is ever written, whatever the tarball contains. That is deliberate — it
@@ -268,7 +259,7 @@ base-uri 'none'; form-action 'none'; frame-ancestors 'none'
 ⚠️ **That policy is a contract with `index.html`.** A script, a web-font link or an external image
 added to the page would be silently blocked in every visitor's browser. `scripts/check-csp.sh`
 enforces the page side on every PR and before every deploy; this section is the server side. If the
-page ever genuinely needs more, change the policy **here and on the box first**.
+page ever genuinely needs more, change the policy **in the role's snippet file and on the box first**.
 
 ⚠️ **HSTS is a one-year promise.** Once a browser has seen it, it refuses plain HTTP for
 `seandesmet.com` for a year and will not let a visitor click through a certificate error. That is
@@ -290,24 +281,11 @@ drop every header this section adds, for that location.
 
 ### 9b. Write the snippet
 
-Written whole, from a quoted heredoc, so nothing in it is expanded or re-quoted on the way:
+The snippet is [`infra/ansible/roles/www_site/files/seandesmet-security-headers.conf`](infra/ansible/roles/www_site/files/seandesmet-security-headers.conf)
+(#44), and the role installs it. By hand, from a clone:
 
 ```sh
-ssh $DROPLET 'cat > /etc/nginx/snippets/seandesmet-security-headers.conf' <<'EOF'
-# Security headers for seandesmet.com. Managed from the seandesmet.com repo,
-# SETUP.md §9 (#29) — change it there first.
-# The CSP is a contract with index.html: no scripts, inline styles only, fonts
-# and images as data: URIs. scripts/check-csp.sh enforces the page side.
-server_tokens off;
-charset utf-8;
-add_header Strict-Transport-Security "max-age=31536000" always;
-add_header Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" always;
-add_header X-Content-Type-Options "nosniff" always;
-add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;
-add_header X-Frame-Options "DENY" always;
-add_header Cross-Origin-Opener-Policy "same-origin" always;
-EOF
+ssh $DROPLET 'cat > /etc/nginx/snippets/seandesmet-security-headers.conf' < infra/ansible/roles/www_site/files/seandesmet-security-headers.conf
 ssh $DROPLET 'cat /etc/nginx/snippets/seandesmet-security-headers.conf'
 ```
 
